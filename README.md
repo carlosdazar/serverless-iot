@@ -74,9 +74,9 @@ Conexiones:
 
 **Tópicos MQTT:** 
 
-* *Publicación (`esp32/values`):** Tópico donde el ESP32 envía la telemetría cada 5 segundos.
+* *Publicación (`esp32/values`):* Tópico donde el ESP32 envía la data cada 5 segundos.
 
-* *Suscripción (`esp32/actuadores`):** Tópico donde el ESP32 escucha los comandos en tiempo real.
+* *Suscripción (`esp32/actuadores`):* Tópico donde el ESP32 escucha los comandos en tiempo real.
 
 ### Archivo de Configuración (config.h)
 
