@@ -12,7 +12,7 @@ Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles
 
 AWS IoT Core actúa como el *broker* MQTT central que permite la comunicación segura y bidireccional entre el ESP32, las funciones Lambda y el Dashboard Web.
 
-### creación del objeto (Thing)
+### Creación del objeto (Thing)
 
 Un objeto de IoT es una representación digital de su dispositivo físico en la nube, para crear un objeto se realiza le siguiente proceso:
 
@@ -30,7 +30,9 @@ Un objeto de IoT es una representación digital de su dispositivo físico en la 
 
 6. Se asigna un nombre de la política ej `esp32-cocatrace-policy`
 
-7. Se deben asignar los documentos de política, indica de manera estructurada quién puede hacer qué, sobre qué recurso y bajo qué condiciones. En este caso el dispositivo esp32. Se crea lo siguiente
+7. Se deben asignar los documentos de política, indica de manera estructurada quién puede hacer qué, sobre qué recurso y bajo qué condiciones. En este caso el dispositivo esp32.
+  
+Se crea lo siguiente
 
 ![politicas](docs/politicas.png)
 
