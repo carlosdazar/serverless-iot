@@ -134,7 +134,7 @@ Para probar la conexión MQTT entre ESP32 y AWS Iot Core se debe hacer lo siguie
 
 ![conexion_MQTT](docs/conexion_MQTT.png)
 
-Se debe suscribir al mismo topic `esp32/values` que se suscribió el ESP32   para enviar los datos.
+Se debe suscribir al mismo topic `esp32/values` que se suscribió el ESP32 para enviar los datos.
 
 Los datos que se reciben se pueden observar en `Tema`.
 
@@ -142,8 +142,9 @@ Los datos que se reciben se pueden observar en `Tema`.
 
 Se utiliza como la base de datos NoSQL gestionada e independiente de servidores (*serverless*) para almacenar el historial de lecturas provenientes del sensor DHT11.
 
-## creación de la tabla
-para crear la tabla de almacenamiento se realiza le siguiente proceso:
+## Creación de la tabla
+
+Para crear la tabla de almacenamiento se realiza le siguiente proceso:
 
 1. Ir a la consola de `DinamoDB `  > `Tablas ` > `crear tabla `.
 
