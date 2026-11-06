@@ -18,6 +18,7 @@ Un objeto de IoT es una representación digital de su dispositivo físico en la 
 
 1. Ir a la consola de `AWS IoT core `  > `Administrar ` >`todos los dispositivos ` > `Objetos `
 
+![objetos](docs/objetos.png)
 
 2. Se debe hacer click en la opción `crear objetos ` > `crear un único objeto`
 
@@ -31,9 +32,11 @@ Un objeto de IoT es una representación digital de su dispositivo físico en la 
 
 7. Se deben asignar los documentos de política, indica de manera estructurada quién puede hacer qué, sobre qué recurso y bajo qué condiciones. En este caso el dispositivo esp32. Se crea lo siguiente
 
-política para otorgar permisos de conexión, publicación y suscripción al ESP32
+![politicas](docs/politicas.png)
 
-El uso * es para que estas políticas sirvan en cualquier recurso.
+* las política sirven para otorgar permisos de conexión, publicación y suscripción al ESP32
+
+* El uso * es para que estas políticas sirvan en cualquier recurso.
 
 8.  Se crean las políticas > en la pestaña anterior se debe verificar que las políticas estén asociadas al objeto > se crea el objeto.
 
@@ -50,5 +53,130 @@ Una vez creado el objeto > dar click al nombre del objeto > certificados > click
 En caso de no tener políticas adjuntar política > buscar el nombre de la política creada
 
 10. tambien se debe guardar el `end-point` este se ubica en
+
+![dominio](docs/dominio.png)
+
+## 2. Configuración ESP32
+
+El microcontrolador ESP32 está programado en C++ usando el framework de Arduino. Su función principal es leer los datos del sensor de temperatura y humedad (DHT11), sincronizar la hora local mediante un servidor NTP, transmite la información a la nube AWS mediante el protocolo MQTT/HTTPS y reacciona a las órdenes de control enviadas desde el Dashboards web.
+
+Conexiones:
+
+•	DHTPIN: Data conectada al GPIO 19.
+
+•	VCC: 3.3V / 5V.
+
+•	GND: Tierra común.
+
+•	LED: GPIO 2 Conectado en serie con la resistencia de 220 Ω
+
+**Tópicos MQTT:** 
+
+* *Publicación (`esp32/values`):** Tópico donde el ESP32 envía la telemetría cada 5 segundos.
+
+* *Suscripción (`esp32/actuadores`):** Tópico donde el ESP32 escucha los comandos en tiempo real.
+
+### Archivo de Configuración (config.h)
+
+Se crea el archivo llamado `config.h` para las claves de red Wi-Fi y los certificados TLS X.509 de AWS IoT Core, en este archivo se debe incluir
+
+1. Las variables de entorno para la red local (`WIFI_SSID`, `WIFI_PASSWORD`).
+
+2. El **Endpoint de AWS IoT Core**, los tópicos MQTT y el contenido textual de los certificados descargados (`AmazonRootCA1.pem`, `xxxx-certificate.pem.crt` y `xxxx-private.pem.key`) utilizando la sintaxis `PROGMEM R"EOF(...)EOF"`.
+
+Se puede observar más a detalle en XXXXXXX
+
+### Lógica del Firmware y Publicación
+
+El proyecto está diseñado bajo un modelo **bidireccional de dos vías**, separando el canal de recolección de telemetría (sensores) del canal de control remoto (actuadores).
+
+* Enviar Datos
+
+1. Inicializa el puerto serie a `9600` baudios, el sensor DHT11 y el pin del LED como salida. 
+    
+2. Llama a `conncetAWS()` para conectarse a la red y al *broker* MQTT.
+
+3.  Configura la sincronización horaria mediante un servidor **NTP** (`pool.ntp.org`) ajustado a la zona horaria UTC-5 para obtener timestamps precisos.
+   
+4.  Establece la conexión Wi-Fi en modo estación (`WIFI_STA`). 
+
+5. Asigna los certificados de seguridad TLS al cliente `espClient`.
+
+6.  Configura el puerto seguro `8883`, la función *callback* para escuchar mensajes y amplía el buffer de MQTT a 512 bytes con `esp32.setBufferSize(512)` para evitar truncamiento de datos JSON.
+     
+7.  Intenta la conexión con un límite de 20 reintentos antes de marcar timeout y se suscribe a `esp32/actuadores`.
+    
+8.  Construye una estructura JSON dinámica en memoria usando `ArduinoJson` (`StaticJsonDocument<200>`) con el siguiente esquema:
+
+```bash
+json
+ { "timestamp": 1793859932,
+"id_sensor": "ESP32", "temperatura": 23.8, "humedad": 50.8,
+"lote": "LOTE-2026-01", "proceso": "SECADO" }
+```
+* Callbacks desde AWS
+
+Se usa `messageHandler(char* topic, byte* payload, unsigned int length) `, Actúa como función callback asíncrona cuando llega un mensaje desde AWS.
+  
+Se Deserializa el JSON entrante y extrae el valor de la clave `message`.
+  
+* Si message es "ON" $\rightarrow$ Conmuta digitalWrite(LED_PIN, HIGH).
+
+* Si message es "OFF" $\rightarrow$ Conmuta digitalWrite(LED_PIN, LOW).
+
+El codigo completo se puede observar en: xxxxxxx
+
+## 3. Probar conexión MQTT
+
+Para probar la conexión MQTT entre ESP32 y AWS Iot Core se debe hacer lo siguiente:
+
+![conexion_MQTT](docs/conexion_MQTT.png)
+
+Se debe suscribir al mismo topic `esp32/values` que se suscribió el ESP32   para enviar los datos.
+
+Los datos que se reciben se pueden observar en `Tema`.
+
+# 4. Base de datos DynamoDB
+
+Se utiliza como la base de datos NoSQL gestionada e independiente de servidores (*serverless*) para almacenar el historial de lecturas provenientes del sensor DHT11.
+
+## creación de la tabla
+para crear la tabla de almacenamiento se realiza le siguiente proceso:
+
+1. Ir a la consola de `DinamoDB `  > `Tablas ` > `crear tabla `.
+
+2. Se debe asigna el nombre de la tabla ej `valores-sensor-dht11`.
+   
+3. la clave de partición es el atributo principal que identifica a un elemento y determina en qué servidor o partición física de almacenamiento se guardan sus datos. Esta se configura de la siguiente manera:
+
+![claves](docs/claves.png)
+
+* **Clave de partición (Partition Key):** `device_id` (`String` / Cadena) :Actúa como el identificador único del dispositivo IoT (ej. `"ESP32"`). Se utiliza mediante una función hash para asignar físicamente los datos entre los distintos nodos de almacenamiento de AWS.
+  
+* **Clave de ordenación (Sort Key):** `timestamp` (`String` / Cadena) :Segunda parte de la clave principal compuesta. Permite registrar múltiples mediciones para un mismo `device_id` y ordenarlas o consultarlas cronológicamente.
+
+Se crea la tabla
+
+# 5 Reglas de enrutamiento
+
+Para que los mensajes publicados por el ESP32 en el tópico `esp32/values` se almacenen automáticamente sin pasar por código intermedio se hace el siguiente proceso
+
+1. Ir a la consola de  `AWS IoT core`> Enrutamiento de mensajes > Reglas > crear regla.
+   
+2. Se asigna nombre de la regla ej  `save_data_dynamodb`.
+   
+3. Se configura la instrucción SQL.
+
+![consulta_sql](docs/consulta_sql.png)
+
+`FROM 'esp32/values':` Define el tópico MQTT origen que el motor de reglas escuchará en tiempo real.
+
+`SELECT *:` Selecciona y extrae automáticamente todas las claves del payload JSON enviado por el microcontrolador.
+
+`timestamp, id_sensor, `…: Mapea explícitamente los atributos de primer nivel para garantizar que estén disponibles para la acción de inserción en DynamoDB, permitiendo enlazar la Partition Key` (device_id / id_sensor`) y la Sort Key` (timestamp). `
+
+4. luego se asigna las acciones de la regla a la regla creada
+
+![acciones_reglas](docs/acciones_reglas.png)
 
 
