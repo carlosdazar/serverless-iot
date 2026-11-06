@@ -179,4 +179,152 @@ Para que los mensajes publicados por el ESP32 en el tópico `esp32/values` se al
 
 ![acciones_reglas](docs/acciones_reglas.png)
 
+* `${id_sensor} ` *(Extrae en tiempo de ejecución el ID del dispositivo del payload procesado)*.
+  
+* `${timestamp}` *(Extrae la marca de tiempo UNIX o formateada enviada por el ESP32)*.
+
+5. en Rol de IAM SE asigna  `LabRole` y se crea la tabla
+
+## observar valores de la tabla
+
+Para ver los registros guardados se hace el siguiente proceso:
+
+1. En  la consola de `DinamoDB `  > explorar elementos.
+   
+2. se ubica el nombre de la tabla  > opción Examen > ejecutar.
+
+# 5. Lambda
+
+El backend de la aplicación utiliza funciones **AWS Lambda** escritas en Python 3.x para procesar las peticiones HTTP/REST provenientes del Dashboard web a través de **API Gateway**.
+
+Lambda actúa como el procesador intermedio (el "cerebro" del backend) que conecta el Dashboard web alojado en S3 con los servicios de AWS (DynamoDB y AWS IoT Core).
+
+## creación de lambda Peticiones GET
+
+1. en la consola de `lambda `  > create event function
+
+2. se asigna el nombre la función ej `iot-backend`
+
+3. se elije la version ejecutable en este caso Python 3.13
+
+4. En la opción de configuración personalizada > configuración adicional > se activa -rol de ejecución personalizada > labrole
+   
+5. se crea el `lambda `
+    
+6. se crea una nueva ventana con varias opciones > codigo
+    
+Se crea el codigo de la función lamba
+
+Esta función Lambda actúa como la API de lectura (método `GET`) invocado por el Dashboard web.
+
+* *Extracción:* Ejecuta un `scan()` sobre la tabla DynamoDB `valores-sensor-dht11`.
+   
+* *Parsing de Tipos (`DecimalEncoder`):* Adapta los valores numéricos de tipo `Decimal` propios de DynamoDB al formato estándar `float` de JSON.
+   
+* *Filtro Cronológico:* Ordena la telemetría según la clave `timestamp`, selecciona las 50 mediciones más recientes y las reordena cronológicamente (de antigua a reciente) para facilitar el renderizado lineal en **Chart.js**.
+
+* *Respuesta CORS:* Retorna la lista en formato JSON con la cabecera `Access-Control-Allow-Origin: '*'` habilitada.
+
+El codigo completo se puede observar en xxxx
+
+Se lanza el codigo en `deploy`
+
+## Agregar desencadenador
+
+Se utiliza **Amazon API Gateway** para exponer una interfaz REST pública que permite al Dashboard web para consumir los datos guardados.
+
+1. se da en la opción + agregar desencadenador, las opciones que se usan son:
+
+![desencadenador_1](docs/desencadenador_1.png)
+
+2.Luego se da a la opción agregar para activarla con la lambda anteriormente creado
+
+3. en la consola de `Gateway de API` > crear recurso
+   
+4. se usan los siguientes detalles
+
+![recurso](docs/recurso.png)
+
+5. En la pestaña principal > crear método
+   
+6. tipo de método > GET > función de Lambda
+   
+7. se activa la opción `integración de proxy de lambda`
+   
+8. función de lambda > `iot-backend`> crear
+
+En la pagina principal
+
+![recurso_cors](docs/recurso_cors.png)
+
+luego
+
+![cors](docs/cors.png)
+
+Luego se implementa el api en etapa `prod`
+
+##creación de lambda Peticiones POST
+
+1. en la consola de `lambda ` > create event function
+
+2. se asigna el nombre la función ej. `iot-actuador`
+   
+3. se elige la version ejecutable en este caso Python 3.13
+
+4. En la opción de configuración personalizada > configuración adicional > se activa -rol de ejecución personalizada > labrole
+
+5. se crea la lambda
+
+6. se crea una nueva ventana con varias opciones > codigo
+
+Se crea el codigo de la función lamba
+
+Esta lambda Recibe la orden de encendido/apagado desde el Dashboard web y publicar un payload MQTT hacia el tópico esp32/actuadores de la siguiente manera
+
+* Parseo seguro del cuerpo JSON enviado por API Gateway (soporta string y dict) body = json.loads(event.get('body', '{}')) if isinstance(event.get('body'), str) else event.get('body', {}) 
+
+* Extracción de variables requeridas con valores de respaldo (fallback) estado = body.get('estado', 'OFF') device_id = body.get('device_id', 'ESP32') 
+
+* Construcción del payload estructurado para el ESP32 (con epoch timestamp) mensaje = { "device_id": device_id, "message": estado, "timestamp": event.get('requestContext', {}).get('requestTimeEpoch', '') }
+
+* Tópico MQTT de destino para actuadores topico_mqtt = "esp32/actuadores" 
+
+*  Publicación del paquete en el broker MQTT de AWS IoT Core (QoS 1) iot_client.publish( topic=topico_mqtt, qos=1, payload=json.dumps(mensaje) ) 
+
+* Respuesta HTTP 200 con cabeceras CORS activas para el navegador return { 'statusCode': 200, 'headers': { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, 'body': json.dumps({'mensaje': f'Comando {estado} enviado exitosamente al topico {topico_mqtt}'}) } except Exception as e:
+
+* Manejo de excepciones y registro de logs en CloudWatch print("Error al publicar en IoT Core:", str(e)) return { 'statusCode': 500, 'headers': { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, 'body': json.dumps({'error': str(e)}) }
+
+El codigo completo se puede observar en xxxxxx
+
+Se lanza el codigo en deploy
+
+## Agregar desencadenador
+
+1. se da en la opción + agregar desencadenador, las opciones que se usan son:
+
+![desencadenador_2](docs/desencadenador_2.png)
+
+En este caso se usa el api existente
+
+2. Se da a agregar
+   
+3. En la consola de `Gateway de API` > recursos
+   
+4. Se selecciona el recurso en este caso `iot-actuador` > crear método
+   
+5. Tipo de método > post > función de Lambda
+   
+7. Se activa la opción `integración de proxy de lambda`
+   
+9. Función de lambda > `iot-actuador`> crear
+    
+11. Se habilita CORS como en el anterior Lambda
+    
+Luego se implementa el api en etapa `prod`
+
+#6. Dashboards S3
+
+
+
 
