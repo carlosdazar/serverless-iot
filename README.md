@@ -1,6 +1,6 @@
 # Monitoreo IoT y Control Bidireccional con ESP32 & AWS
 
-sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles, permite visualizar en tiempo real datos de temperatura y humedad recolectados por un sensor DHT11 y accionar actuadores (LED) de forma remota mediante un Dashboards web alojado en AWS.
+Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles, permite visualizar en tiempo real datos de temperatura y humedad recolectados por un sensor DHT11 y accionar actuadores (LED) de forma remota mediante un Dashboards web alojado en AWS.
 
 ## Integrantes
 * Valentina Arciniegas
