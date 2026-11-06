@@ -266,7 +266,7 @@ luego
 
 Luego se implementa el api en etapa `prod`
 
-##creación de lambda Peticiones POST
+## Creación de lambda Peticiones POST
 
 1. en la consola de `lambda ` > create event function
 
