@@ -89,7 +89,7 @@ Se crea el archivo llamado `config.h` para las claves de red Wi-Fi y los certifi
 
 2. El **Endpoint de AWS IoT Core**, los tópicos MQTT y el contenido textual de los certificados descargados (`AmazonRootCA1.pem`, `xxxx-certificate.pem.crt` y `xxxx-private.pem.key`) utilizando la sintaxis `PROGMEM R"EOF(...)EOF"`.
 
-Se puede observar más a detalle en firmware/credentials.h
+Se puede observar más a detalle en `firmware/credentials.h`
 
 ### Lógica del Firmware y Publicación
 
@@ -129,7 +129,7 @@ Se Deserializa el JSON entrante y extrae el valor de la clave `message`.
 
 * Si message es "OFF" $\rightarrow$ Conmuta digitalWrite(LED_PIN, LOW).
 
-El codigo completo se puede observar en: firmware/aws_esp32.ino
+El codigo completo se puede observar en: `firmware/aws_esp32.ino`
 
 ## 3. Probar conexión MQTT
 
