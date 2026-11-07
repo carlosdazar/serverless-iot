@@ -8,6 +8,9 @@ Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles
 * Carlos Daza
 * Andres Coral
 
+## Arquitectura
+![arquitectura_serverles](docs/arquitectura_serverles.jpeg)
+
 ## 1. Configuración de AWS IoT Core
 
 AWS IoT Core actúa como el *broker* MQTT central que permite la comunicación segura y bidireccional entre el ESP32, las funciones Lambda y el Dashboard Web.
