@@ -1,6 +1,6 @@
 # Monitoreo IoT y Control Bidireccional con ESP32 & AWS
 
-Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles, permite visualizar en tiempo real datos de temperatura y humedad recolectados por un sensor DHT11 y accionar actuadores (LED) de forma remota mediante un Dashboards web alojado en AWS.
+Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles, permite visualizar en tiempo real datos de temperatura y humedad recolectados por un sensor DHT11 para el control de variables críticas  en las etapas de secado y almacenamiento de bioproductos de hoja de coca. Acciona actuadores (LED) de forma remota mediante un Dashboards web alojado en AWS.
 
 ## Integrantes
 * Valentina Arciniegas
@@ -233,7 +233,7 @@ Esta función Lambda actúa como la API de lectura (método `GET`) invocado por 
 
 El codigo completo se puede observar en `src/lambda/iot-backend`
 
-Se lanza el codigo en `deploy`
+Se lanza el codigo en `prod`
 
 ## Agregar desencadenador
 
@@ -303,7 +303,7 @@ Esta lambda Recibe la orden de encendido/apagado desde el Dashboard web y public
 
 El codigo completo se puede observar en `src/lamda/iot-actuador`
 
-Se lanza el codigo en deploy
+Se lanza el codigo en `prod`
 
 ## Agregar desencadenador
 
