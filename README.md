@@ -63,7 +63,7 @@ serverless-iot-main/
  - [7. Dashboard S3](#7-dashboard-S3)
    - [Estructura Dashboard](#Estructura-Dashboard)
    - [Tarjeta de temperatura](#Tarjeta-de-temperatura)
-   - [Tarjeta de humedada](#Tarjeta-de-humedad)
+   - [Tarjeta de humedad](#Tarjeta-de-humedad)
    - [Control del actuador](#Control-del-actuador)
    - [Historial de registros](#Historial-de-registros)
    - [Consulta de datos de sensores](#Consulta-de-datos-de-sensores)
