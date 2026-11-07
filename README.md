@@ -258,7 +258,7 @@ Se utiliza **Amazon API Gateway** para exponer una interfaz REST pública que pe
 
 En la pagina principal
 
-![recurso_cors](docs/recurso_cors.png)
+![recurso_cors](docs/cors.png)
 
 luego
 
