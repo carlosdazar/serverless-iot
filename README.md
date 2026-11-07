@@ -8,7 +8,41 @@ Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles
 * Carlos Daza
 * Andres Coral
 
+##  Estructura del Repositorio
+```
+serverless-iot-main/
+├── docs/                     # Diagramas, capturas de pantalla y evidencias del proyecto
+│   ├── acciones_reglas.png
+│   ├── alojamiento.png
+│   ├── arquitectura_serverles.png
+│   ├── bloqueo.png
+│   ├── claves.png
+│   ├── conexion_MQTT.png
+│   ├── consulta_sql.png
+│   ├── cors.png
+│   ├── dashboard.png
+│   ├── desencadenador_1.png
+│   ├── desencadenador_2.png
+│   ├── dominio.png
+│   ├── objetos.png
+│   ├── permisos.png
+│   ├── politicas.png
+│   ├── recurso.png
+│   └── recurso_cors.png
+├── firmware/                 # Código fuente para el microcontrolador ESP32
+│   ├── aws_esp32.ino         # Lógica principal (lectura de sensores, conexión MQTT/NTP)
+│   └── credentials.h         # Certificados SSL X.509 y credenciales Wi-Fi (config.h)
+├── src/                      # Código fuente del backend Serverless
+│   └── lambda/               # Funciones AWS Lambda (Python 3.x)
+│       ├── iot-actuador/     # Código de la función Lambda para peticiones POST (Control LED)
+│       │   └── lambda_function.py
+│       └── iot-backend/      # Código de la función Lambda para peticiones GET (Lectura DynamoDB)
+│           └── lambda_function.py
+├── .gitignore                # Archivos y carpetas excluidos del control de versiones
+├── index.html                # Interfaz web del Dashboard alojada en Amazon S3
+└── README.md                 # Documentación principal del proyecto
 
+```
 
 ## Tabla de Contenidos
 - [1. Configuración de AWS IoT Core](#1-configuración-de-aws-iot-core)
