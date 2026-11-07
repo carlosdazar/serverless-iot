@@ -262,7 +262,7 @@ En la pagina principal
 
 luego
 
-![cors](docs/cors.png)
+![recurso_cors](docs/recurso_cors.png)
 
 Luego se implementa el api en etapa `prod`
 
