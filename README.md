@@ -61,7 +61,7 @@ serverless-iot-main/
    - [Creación de Lambda Peticiones POST](#creación-de-lambda-peticiones-post)
    - [Agregar desencadenador](#Agregar-desencadenador)
  - [7. Dashboard S3](#7-dashboard-S3)
-   - [Extructura Dashboard](#Extructura-Dashboard)
+   - [Estructura Dashboard](#Estructura-Dashboard)
    - [Tarjeta de temperatura](#Tarjeta-de-temperatura)
    - [Tarjeta de humedada](#Tarjeta-de-humedad)
    - [Control del actuador](#Control-del-actuador)
@@ -437,7 +437,7 @@ Se crea el bucket
 8. En `Objetos` se agrega `index.html`. este se explica a mas a detalle en la siguiente sección 
 
 
-##  Extructura Dashboard
+##  Estructura Dashboard
 El dashboard permite visualizar en tiempo real las mediciones obtenidas por un dispositivo IoT, consultar el historial de registros almacenados, representar gráficamente el comportamiento de las variables y enviar comandos para encender o apagar un actuador conectado al dispositivo. La comunicación entre la interfaz web y el sistema IoT se realiza mediante servicios API REST desplegados en AWS, utilizando peticiones HTTP GET para la consulta de datos y HTTP POST para el envío de comandos al actuador.
 
 A continuación, se explica la estructura del dashboard:
