@@ -15,7 +15,7 @@ Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles
    - [Creación del objeto (Thing)](#creación-del-objeto-thing)
 - [2. Configuración ESP32](#2-configuración-esp32)
    - [Archivo de Configuración (config.h)](#archivo-de-configuración-configh)
-    -[Lógica del Firmware y Publicación](#lógica-del-firmware-y-publicación)
+   - [Lógica del Firmware y Publicación](#lógica-del-firmware-y-publicación)
 - [3. Probar conexión MQTT](#3-probar-conexión-mqtt)
 - [4. Base de datos DynamoDB](#4-base-de-datos-dynamodb)
    - [Creación de la tabla](#creación-de-la-tabla)
@@ -26,8 +26,8 @@ Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles
    - [Agregar desencadenador](#Agregar-desencadenador)
    - [Creación de Lambda Peticiones POST](#creación-de-lambda-peticiones-post)
    - [Agregar desencadenador](#Agregar-desencadenador)
- - [6. Dashboard S3)](#7-dashboard-s3)
-   - [Dashboard](#Dashboardz)
+ - [6. Dashboard S3](#7-dashboard-S3)
+   - [Extructura Dashboard](#Extructura-Dashboard)
    - [Tarjeta de temperatura)](#Tarjeta-de-temperatura)
    - [Tarjeta de humedada](#Tarjeta-de-humedad)
    - [Control del actuador](#Control-del-actuador)
@@ -356,7 +356,7 @@ En este caso se usa el api existente
     
 Luego se implementa el api en etapa `prod`
 
-# 6. Dashboards S3
+# 6. Dashboard S3
 
 Amazon S3 (Simple Storage Service) es el servicio de almacenamiento de objetos en la nube que ofrece AWS. Está diseñado para guardar y recuperar cualquier cantidad de datos desde cualquier lugar de Internet con alta disponibilidad, seguridad y durabilidad.
 
@@ -403,7 +403,7 @@ Se crea el bucket
 8. En `Objetos` se agrega `index.html`. este se explica a mas a detalle en la siguiente sección 
 
 
-## Dashboard
+##  Extructura Dashboard
 El dashboard permite visualizar en tiempo real las mediciones obtenidas por un dispositivo IoT, consultar el historial de registros almacenados, representar gráficamente el comportamiento de las variables y enviar comandos para encender o apagar un actuador conectado al dispositivo. La comunicación entre la interfaz web y el sistema IoT se realiza mediante servicios API REST desplegados en AWS, utilizando peticiones HTTP GET para la consulta de datos y HTTP POST para el envío de comandos al actuador.
 
 A continuación, se explica la estructura del dashboard:
