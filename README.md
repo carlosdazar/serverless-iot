@@ -9,7 +9,7 @@ Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles
 * Andres Coral
 
 ## Arquitectura
-![arquitectura_serverles](docs/arquitectura_serverles.jpeg)
+![arquitectura_serverles](docs/arquitectura_serverles.png)
 
 ## 1. Configuración de AWS IoT Core
 
