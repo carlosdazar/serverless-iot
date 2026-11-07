@@ -332,5 +332,84 @@ Luego se implementa el api en etapa `prod`
 # 6. Dashboards S3
 
 
+## Dashboard
+El dashboard permite visualizar en tiempo real las mediciones obtenidas por un dispositivo IoT, consultar el historial de registros almacenados, representar gráficamente el comportamiento de las variables y enviar comandos para encender o apagar un actuador conectado al dispositivo. La comunicación entre la interfaz web y el sistema IoT se realiza mediante servicios API REST desplegados en AWS, utilizando peticiones HTTP GET para la consulta de datos y HTTP POST para el envío de comandos al actuador.
 
+A continuación, se explica la estructura del dashboard:
 
+### Tarjeta de temperatura
+
+Presenta el valor más reciente de temperatura registrado por el sensor, expresado en grados Celsius. Además, muestra un gráfico de líneas que permite visualizar el comportamiento de las últimas 10 mediciones recibidas donde el eje horizontal muestra la hora de cada medición y el eje vertical representa los valores de temperatura.
+
+### Tarjeta de humedad
+
+Muestra el valor más reciente de humedad, expresado en porcentaje. Al igual que la tarjeta de temperatura, dispone de un gráfico dinámico que representa las últimas 10 mediciones recibidas donde el eje horizontal muestra la hora de cada medición y el eje vertical representa los valores de humedad.
+
+### Control del actuador
+
+Esta sección permite controlar remotamente un actuador LED conectado al dispositivo IoT. La interfaz dispone de dos botones:
+
+* ENCENDER: envía un comando ON al servicio backend para solicitar el encendido del actuador.
+* APAGAR: envía un comando OFF al servicio backend para solicitar el apagado del actuador.
+
+La interfaz también dispone de un mensaje de estado que informa si el comando fue enviado correctamente o si se presentó algún error de comunicación.
+
+### Historial de registros
+
+Esta sección permite consultar los últimos 10 registros recibidos desde el backend. La tabla presenta la siguiente información: Fecha y Hora (momento en que se realizó la medición), Temperatura (valor de temperatura registrado), Humedad (Valor de humedad registrado) y Lote / Proceso	(identificación del lote y del proceso asociado a la medición).
+
+También se evidencia un botón para descargar el historial completo de mediciones en formato CSV. El archivo generado contiene las siguientes columnas: Fecha y hora, Temperatura, Humedad, Lote y Proceso. El nombre del archivo incluye la fecha de descarga para facilitar su identificación.
+
+### Consulta de datos de sensores
+
+Se utiliza una petición HTTP GET para obtener los registros históricos de temperatura y humedad almacenados en el backend, mediante el endpoint:
+
+```bash
+https://etwhtp502c.execute-api.us-east-1.amazonaws.com/prod/iot-backend/valuessensor
+```
+
+La función `obtenerDatosSensor()` del script en index.html realiza las siguientes operaciones:
+
+* Ejecuta una petición HTTP GET al endpoint configurado.
+* Procesa la respuesta JSON recibida.
+* Identifica y organiza los registros según su timestamp.
+* Obtiene la última medición disponible.
+* Actualiza los indicadores de temperatura y humedad.
+* Actualiza los gráficos con las últimas 10 mediciones.
+* Procesa el historial completo para permitir su exportación.
+* Actualiza la tabla con los 10 registros más recientes.
+
+La consulta se ejecuta automáticamente cada 5 segundos mediante la función setInterval().
+
+### Control del actuador
+
+Se utiliza una petición HTTP POST para enviar comandos de control al dispositivo IoT, mediante el endpoint:
+
+```bash
+https://etwhtp502c.execute-api.us-east-1.amazonaws.com/prod/iot-actuador
+```
+
+La función `enviarComando(estadoComando)` recibe como parámetro el estado solicitado (ON u OFF) y realiza la petición. El cuerpo de la solicitud contiene un JSON con los siguientes atributos:
+
+* device_id: identificador del dispositivo IoT. En este proyecto se utiliza ESP32.
+* estado: comando que indica si se debe encender o apagar el actuador.
+
+La respuesta del servidor se utiliza para actualizar el mensaje de estado mostrado en la interfaz.
+
+### Funcionamiento
+
+El funcionamiento general del dashboard se desarrolla mediante el siguiente flujo:
+
+* El dispositivo IoT realiza las mediciones de temperatura y humedad.
+* Los datos son enviados y almacenados en la infraestructura backend (DynamoDB).
+* El dashboard consulta periódicamente el servicio API mediante peticiones GET.
+* El navegador recibe y procesa los registros en formato JSON.
+* Los valores actuales se muestran en los indicadores principales.
+* Los gráficos se actualizan para representar las últimas mediciones.
+* El historial se presenta en una tabla y puede descargarse en formato CSV.
+* Cuando el usuario selecciona ENCENDER o APAGAR, el dashboard envía una petición POST al backend.
+* El backend procesa el comando para solicitar el cambio de estado del actuador conectado al ESP32.
+
+Por último, se muestra una imagen del dashboard funcionando:
+
+![dashboard](docs/dashboard.png)
