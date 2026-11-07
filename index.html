@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard IoT - TEMPERATURA - HUMEDAD</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f4f7f6;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      color: #1a252f;
+      text-align: center;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* En pantallas pequeñas, pasa a 1 sola columna */
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .card-full {
+      grid-column: 1 / -1;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin: 5px 0 15px 0;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 280px; /* Gráficos más altos y claros */
+    }
+
+    .btn-container {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 15px;
+      width: 100%;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-on {
+      background-color: #2ecc71;
+      color: white;
+      flex: 1;
+    }
+
+    .btn-on:hover {
+      background-color: #27ae60;
+    }
+
+    .btn-off {
+      background-color: #e74c3c;
+      color: white;
+      flex: 1;
+    }
+
+    .btn-off:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-csv {
+      background-color: #3498db;
+      color: white;
+    }
+
+    .btn-csv:hover {
+      background-color: #2980b9;
+    }
+
+    .status-text {
+      margin-top: 15px;
+      font-size: 0.95rem;
+      color: #7f8c8d;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      color: #2c3e50;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Dashboard IoT - TEMPERATURA - HUMEDAD</h1>
+
+  <div class="container">
+    <!-- TARJETA 1: Temperatura -->
+    <div class="card">
+      <h2>Temperatura (°C)</h2>
+      <div class="value"><span id="temp-val">--</span> °C</div>
+      <div class="chart-container">
+        <canvas id="tempChart"></canvas>
+      </div>
+    </div>
+
+    <!-- TARJETA 2: Humedad -->
+    <div class="card">
+      <h2>Humedad (%)</h2>
+      <div class="value"><span id="hum-val">--</span> %</div>
+      <div class="chart-container">
+        <canvas id="humChart"></canvas>
+      </div>
+    </div>
+
+    <!-- TARJETA 3: Control del Actuador (LED) -->
+    <div class="card card-full">
+      <h2>Control de Actuador</h2>
+      <div class="btn-container">
+        <button class="btn-on" onclick="enviarComando('ON')">ENCENDER</button>
+        <button class="btn-off" onclick="enviarComando('OFF')">APAGAR</button>
+      </div>
+      <p class="status-text" id="actuator-status">Estado: En espera de comandos</p>
+    </div>
+
+    <!-- TARJETA 4: Historial de Registros -->
+    <div class="card card-full">
+      <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <h2>Últimos Registros</h2>
+        <button class="btn-csv" onclick="descargarCSV()">Descargar CSV</button>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Temperatura (°C)</th>
+            <th>Humedad (%)</th>
+            <th>Lote / Proceso</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-registros">
+          <tr>
+            <td colspan="4">Cargando datos...</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="status-text" id="sensor-status">Última actualización de sensores: --</p>
+    </div>
+  </div>
+
+  <script>
+    const API_GET_URL = 'https://etwhtp502c.execute-api.us-east-1.amazonaws.com/prod/iot-backend/valuessensor';
+    const API_POST_URL = 'https://etwhtp502c.execute-api.us-east-1.amazonaws.com/prod/iot-actuador';
+    const CANTIDAD_REGISTROS = 10;
+	
+	// Variable para almacenar los 10 registros de la tabla
+    let registrosTabla = [];
+	
+	// Variable para guardar todos los registros para la descarga CSV
+    let todosRegistros = [];
+
+    // Inicializar graficos
+    const ctxTemp = document.getElementById('tempChart').getContext('2d');
+    const tempChart = new Chart(ctxTemp, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Temperatura °C',
+          borderColor: '#e74c3c',
+          backgroundColor: 'rgba(231, 76, 60, 0.1)',
+          data: [],
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const ctxHum = document.getElementById('humChart').getContext('2d');
+    const humChart = new Chart(ctxHum, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Humedad %',
+          borderColor: '#3498db',
+          backgroundColor: 'rgba(52, 152, 219, 0.1)',
+          data: [],
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    function formatearFecha(ts) {
+      if (!ts) return new Date().toLocaleString();
+      let timestampNum = Number(ts);
+      if (timestampNum < 10000000000) {
+        timestampNum *= 1000;
+      }
+      return new Date(timestampNum).toLocaleString();
+    }
+
+    // Obtener datos del sensor mediante una peticion GET
+    async function obtenerDatosSensor() {
+      try {
+        const response = await fetch(API_GET_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP Error status: ${response.status}`);
+        }
+        
+        let data = await response.json();
+
+        if (data.body) {
+          try {
+            data = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
+          } catch(e) {}
+        }
+
+        if (data.Items && Array.isArray(data.Items)) {
+          data = data.Items;
+        }
+
+        if (Array.isArray(data) && data.length > 0) {
+          // Ordenar por timestamp de forma ascendente
+          data.sort((a, b) => Number(a.timestamp || 0) - Number(b.timestamp || 0));
+
+          const ultimoRegistro = data[data.length - 1];
+          const payload = ultimoRegistro.payload || ultimoRegistro;
+
+          const temp = payload.temperatura ?? payload.temp ?? null;
+          const hum = payload.humedad ?? payload.hum ?? null;
+          const horaActual = new Date().toLocaleTimeString();
+
+          if (temp !== null && hum !== null) {
+            document.getElementById('temp-val').innerText = temp;
+            document.getElementById('hum-val').innerText = hum;
+
+            // Actualizar gráficas con las ultimas lecturas
+            const subConjunto = data.slice(-CANTIDAD_REGISTROS);
+            
+            tempChart.data.labels = subConjunto.map(item => new Date(Number(item.timestamp) * (item.timestamp < 10000000000 ? 1000 : 1)).toLocaleTimeString());
+            tempChart.data.datasets[0].data = subConjunto.map(item => (item.payload || item).temperatura ?? (item.payload || item).temp);
+            tempChart.update();
+
+            humChart.data.labels = subConjunto.map(item => new Date(Number(item.timestamp) * (item.timestamp < 10000000000 ? 1000 : 1)).toLocaleTimeString());
+            humChart.data.datasets[0].data = subConjunto.map(item => (item.payload || item).humedad ?? (item.payload || item).hum);
+            humChart.update();
+
+            // Guardar los registros recibidos para exportar en formato CSV
+            todosRegistros = [...data].reverse().map(item => {
+              const p = item.payload || item;
+              return {
+                fecha: formatearFecha(item.timestamp || p.timestamp),
+                temp: p.temperatura ?? p.temp ?? '--',
+                hum: p.humedad ?? p.hum ?? '--',
+                lote: p.lote || 'N/A',
+                proceso: p.proceso || 'N/A'
+              };
+            });
+
+            // Mostrar solo los 10 primeros
+            registrosTabla = todosRegistros.slice(0, CANTIDAD_REGISTROS);
+
+            renderizarTabla();
+            document.getElementById('sensor-status').innerText = 'Última actualización: ' + horaActual;
+          }
+        }
+      } catch (error) {
+        console.error('Error GET:', error);
+        document.getElementById('sensor-status').innerText = 'Error al conectar con la API';
+      }
+    }
+
+    function renderizarTabla() {
+      const tbody = document.getElementById('tabla-registros');
+      tbody.innerHTML = '';
+
+      registrosTabla.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.fecha}</td>
+          <td>${item.temp} °C</td>
+          <td>${item.hum} %</td>
+          <td>${item.lote} / ${item.proceso}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Exportar los registros de las medicionaes en formato CSV
+    function descargarCSV() {
+      if (todosRegistros.length === 0) {
+        alert('Aún no hay datos registrados para exportar.');
+        return;
+      }
+	  
+	  // Cabecera del CSV
+      let csvContent = 'data:text/csv;charset=utf-8,Fecha y Hora,Temperatura (C),Humedad (%),Lote,Proceso\n';
+
+      // Recorrer los datos almacenados
+      todosRegistros.forEach(item => {
+        csvContent += `"${item.fecha}",${item.temp},${item.hum},"${item.lote}","${item.proceso}"\n`;
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `mediciones_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Encender o apagar el actuador LED mediante una peticion POST
+    async function enviarComando(estadoComando) {
+      const statusElement = document.getElementById('actuator-status');
+      statusElement.innerText = `Enviando comando ${estadoComando}...`;
+
+      try {
+        const response = await fetch(API_POST_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            device_id: 'ESP32',
+            estado: estadoComando
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusElement.innerText = `Estado: Comando ${estadoComando} enviado correctamente`;
+        } else {
+          statusElement.innerText = 'Error en la respuesta del servidor';
+        }
+      } catch (error) {
+        console.error('Error POST:', error);
+        statusElement.innerText = 'Error de red al enviar el comando';
+      }
+    }
+
+    setInterval(obtenerDatosSensor, 5000);
+    obtenerDatosSensor();
+  </script>
+</body>
+</html>
