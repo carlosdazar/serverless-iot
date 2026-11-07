@@ -231,7 +231,7 @@ Esta función Lambda actúa como la API de lectura (método `GET`) invocado por 
 
 * *Respuesta CORS:* Retorna la lista en formato JSON con la cabecera `Access-Control-Allow-Origin: '*'` habilitada.
 
-El codigo completo se puede observar en xxxx
+El codigo completo se puede observar en `src/lambda/iot-backend`
 
 Se lanza el codigo en `deploy`
 
@@ -301,7 +301,7 @@ Esta lambda Recibe la orden de encendido/apagado desde el Dashboard web y public
 
 * Manejo de excepciones y registro de logs en CloudWatch print("Error al publicar en IoT Core:", str(e)) return { 'statusCode': 500, 'headers': { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, 'body': json.dumps({'error': str(e)}) }
 
-El codigo completo se puede observar en xxxxxx
+El codigo completo se puede observar en `src/lamda/iot-actuador`
 
 Se lanza el codigo en deploy
 
@@ -330,6 +330,50 @@ En este caso se usa el api existente
 Luego se implementa el api en etapa `prod`
 
 # 6. Dashboards S3
+
+Amazon S3 (Simple Storage Service) es el servicio de almacenamiento de objetos en la nube que ofrece AWS. Está diseñado para guardar y recuperar cualquier cantidad de datos desde cualquier lugar de Internet con alta disponibilidad, seguridad y durabilidad.
+
+Para crear el bucket se realiza el siguiente proceso:
+
+1. En la consola de `Amazon S3` > crear bucket
+ 
+2. Se agrega el nombre del bucket ej `dashboard-iot-2026`
+   
+3.  Se concede acceso público a los buckets y objetos de la siguiente manera:
+
+![bloqueo](docs/bloqueo.png)
+   
+Se crea el bucket
+
+4. Despues de crear el bucket > `propiedades`
+   
+5. Se configura`index.html` como documento índice de inicio de la siguiente manera
+
+![alojamiento](docs/alojamiento.png)
+
+6. En `permisos` se realiza lo siguiente:
+
+![permisos](docs/permisos.png)
+
+7. Se añade la siguiente politca de Bucket para permitir lectura pública
+
+```bash
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::tu-nombre-de-bucket/*"
+        }
+    ]
+}
+
+```
+
+8. En `Objetos` se agrega `index.html`. este se explica a mas a detalle en la siguiente sección 
 
 
 ## Dashboard
