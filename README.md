@@ -19,14 +19,14 @@ Sistema completo de Internet de las Cosas (IoT) basado en arquitectura serverles
 - [3. Probar conexión MQTT](#3-probar-conexión-mqtt)
 - [4. Base de datos DynamoDB](#4-base-de-datos-dynamodb)
    - [Creación de la tabla](#creación-de-la-tabla)
-   - [reglas de enrutamiento](#reglas-de-enrutamiento)
+- [5.Reglas de enrutamiento](#5-Reglas-de-enrutamiento)
    - [Observar valores de la tabla](#observar-valores-de-la-tabla)
- - [5. Lambda](#5-Lambda)
+ - [6. Lambda](#5-Lambda)
    - [Creación de Lambda Peticiones GET](#creación-de-lambda-peticiones-get)
    - [Agregar desencadenador](#Agregar-desencadenador)
    - [Creación de Lambda Peticiones POST](#creación-de-lambda-peticiones-post)
    - [Agregar desencadenador](#Agregar-desencadenador)
- - [6. Dashboard S3](#7-dashboard-S3)
+ - [7. Dashboard S3](#7-dashboard-S3)
    - [Extructura Dashboard](#Extructura-Dashboard)
    - [Tarjeta de temperatura)](#Tarjeta-de-temperatura)
    - [Tarjeta de humedada](#Tarjeta-de-humedad)
@@ -226,7 +226,7 @@ Para ver los registros guardados se hace el siguiente proceso:
    
 2. se ubica el nombre de la tabla  > opción Examen > ejecutar.
 
-# 5. Lambda
+# 6. Lambda
 
 El backend de la aplicación utiliza funciones **AWS Lambda** escritas en Python 3.x para procesar las peticiones HTTP/REST provenientes del Dashboard web a través de **API Gateway**.
 
@@ -356,7 +356,7 @@ En este caso se usa el api existente
     
 Luego se implementa el api en etapa `prod`
 
-# 6. Dashboard S3
+# 7. Dashboard S3
 
 Amazon S3 (Simple Storage Service) es el servicio de almacenamiento de objetos en la nube que ofrece AWS. Está diseñado para guardar y recuperar cualquier cantidad de datos desde cualquier lugar de Internet con alta disponibilidad, seguridad y durabilidad.
 
